@@ -1,7 +1,7 @@
 # OptimizeTraffic2AppService
 App Service Lab Configuration for ELX Config Specialize Training
 
-[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FOptimizeTraffic2AppService%2Fmain%2Fazuredeploy.json)
+[![Deploy To Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https://raw.githubusercontent.com/amymcel/OptimizeTraffic2AppService/main/azuredeploy.json)
 
 
 ## This arm deployment will:
