@@ -28,7 +28,7 @@
     "subnet1AddressPrefix": "10.201.1.0/24",
 
     "publicIPAddress1Name": "[concat('appGWpublicIP-', parameters('EngineerAlias'))]",
-    "publicDnsName": "[concat('appGWpub-', parameters('EngineerAlias'))]",
+    "publicDnsName": "[concat('appgwpub-', parameters('EngineerAlias'))]",
     "appGatewayName": "[concat('AppGW-', parameters('EngineerAlias'))]",
     "AppGWsubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('appGWsubnetName'))]",
     "applicationGatewayId": "[resourceId('Microsoft.Network/applicationGateways', variables('appGatewayName'))]",
@@ -139,13 +139,14 @@
       "name": "[variables('publicIPAddress1Name')]",
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-05-01",
-      "location": "[resourceGroup().location]",
+      "location": "[variables('location1')]",
       "sku": { "name": "Standard" },
       "properties": {
         "publicIPAllocationMethod": "Static",
         "publicIPAddressVersion": "IPv4",
         "dnsSettings": {
-          "domainNameLabel": "[variables('publicDnsName')]"
+          "domainNameLabel": "[variables('publicDnsName')]",
+          "fqdn": "[concat(variables('publicDnsName'), '.', variables('location1'), '.cloudapp.azure.com')]"
         }
       }
     },
@@ -231,13 +232,13 @@
             "properties": {
               "RuleType": "Basic",
               "httpListener": {
-                "id": "[concat(variables('applicationGatewayId'), '/httpListeners/httpListener')]"
+                "id": "[concat(variables('applicationGatewayId'), '/httpListeners/app111httpListener')]"
               },
               "backendAddressPool": {
-                "id": "[concat(variables('applicationGatewayId'), '/backendAddressPools/AppBackendPool')]"
+                "id": "[concat(variables('applicationGatewayId'), '/backendAddressPools/app111BackendPool')]"
               },
               "backendHttpSettings": {
-                "id": "[concat(variables('applicationGatewayId'), '/backendHttpSettingsCollection/backendHttpSettings')]"
+                "id": "[concat(variables('applicationGatewayId'), '/backendHttpSettingsCollection/app111HttpSettings')]"
               }
             }
           }
