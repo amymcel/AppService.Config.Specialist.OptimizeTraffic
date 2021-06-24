@@ -12,3 +12,4 @@ App Service Lab Configuration for ELX Config Specialize Training
 4. Create an Application Gateway on the virtual network
 5. Create a public IP address for the Application Gateway
 6. Create an Azure Front Door resource
+
