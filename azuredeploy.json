@@ -2,6 +2,20 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "vnetAddressPrefix": {
+      "type": "string",
+      "defaultValue": "10.201.0.0/16",
+      "metadata": {
+        "description": "Address prefix for vnet"
+      }
+    },    
+    "GatewaySubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.201.0.0/24",
+      "metadata": {
+        "description": "Address range used by Gateway subnet"
+      }
+    },
     "EngineerAlias": {
       "type": "string",
       "defaultValue": "MsAlias",
@@ -12,20 +26,17 @@
   },
   "variables": {
     "webAppRG": "[resourceGroup().name]",
-    "appServicePlanName1": "[concat('ASP1-', parameters('EngineerAlias'))]",
-    "webAppName1": "[concat('APP111-', parameters('EngineerAlias'))]",
-    "location1": "EastUS",
-    "appServicePlanName2": "[concat('ASP2-', parameters('EngineerAlias'))]",
-    "location2": "WestUS",
-    "webAppName2": "[concat('APP222-', parameters('EngineerAlias'))]",
     "webApp-prod-URL": "https://github.com/amymcel/AppService.Config.Specialist.OptimizeTrafficTestApp",
+    "appServicePlanName12": "[concat('ASP12-', parameters('EngineerAlias'))]",
+    "webAppName1": "[concat('APP111-', parameters('EngineerAlias'))]",
+    "webAppName2": "[concat('APP222-', parameters('EngineerAlias'))]",
+    "location12": "EastUS",
+    "webAppName3": "[concat('APP333-', parameters('EngineerAlias'))]",
+    "appServicePlanName3": "[concat('ASP3-', parameters('EngineerAlias'))]",
+    "location3": "WestUS",
 
     "vnetName": "[concat('VNet-', parameters('EngineerAlias'))]",
-    "vnet1AddressPrefix": "10.201.0.0/16",
-    "appGWsubnetName": "AppGWsubnet",
-    "appGWsubnetAddress": "10.201.0.0/24",
-    "subnet1Name": "default",
-    "subnet1AddressPrefix": "10.201.1.0/24",
+    "appGWsubnetName": "AppGW",
 
     "publicIPAddress1Name": "[concat('appGWpublicIP-', parameters('EngineerAlias'))]",
     "publicDnsName": "[concat('appgwpub-', parameters('EngineerAlias'))]",
@@ -36,32 +47,26 @@
     "FrontEndIpId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/applicationGateways/',  variables('appGatewayName'), '/frontendIPConfigurations/appGwPublicFrontendIP')]",
 
     "frontDoorName": "[concat('FDoor-', parameters('EngineerAlias'))]",
-    "backendAddress": "[concat('ASP222-', parameters('EngineerAlias'), 'azurewebsites.net')]"
+    "backendAddress": "[concat('APP333-', parameters('EngineerAlias'), 'azurewebsites.net')]"
   },
 
   "resources": [
     {
       "name": "[variables('vnetName')]",
       "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2019-12-01",
-      "location": "[variables('location1')]",
+      "apiVersion": "2020-05-01",
+      "location": "[variables('location12')]",
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
-            "[variables('vnet1AddressPrefix')]"
+            "[parameters('vnetAddressPrefix')]"
           ]
         },
         "subnets": [
           {
             "name": "[variables('appGWsubnetName')]",
             "properties": {
-              "addressPrefix": "[variables('appGWsubnetAddress')]"
-            }
-          },
-          {
-            "name": "[variables('subnet1Name')]",
-            "properties": {
-              "addressPrefix": "[variables('subnet1AddressPrefix')]"
+              "addressPrefix": "[parameters('GatewaySubnetPrefix')]"
             }
           }
         ]
@@ -69,10 +74,10 @@
     },
 
     {
-      "name": "[variables('appServicePlanName1')]",
+      "name": "[variables('appServicePlanName12')]",
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2018-02-01",
-      "location": "[variables('location1')]",
+      "location": "[variables('location12')]",
       "sku": {
         "name": "S1",
         "capacity": 0
@@ -84,13 +89,13 @@
       "name": "[variables('webAppName1')]",
       "type": "Microsoft.Web/sites",
       "apiVersion": "2018-11-01",
-      "location": "[variables('location1')]",
+      "location": "[variables('location12')]",
       "kind": "app",
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName1'))]"
+        "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName12'))]"
       ],
       "properties": {
-        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName1'))]"
+        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName12'))]"
       },
       "resources": [
         {
@@ -110,10 +115,39 @@
     },
 
     {
-      "name": "[variables('appServicePlanName2')]",
+      "name": "[variables('webAppName2')]",
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "location": "[variables('location12')]",
+      "kind": "app",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName12'))]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName12'))]"
+      },
+      "resources": [
+        {
+          "name": "web",
+          "type": "sourcecontrols",
+          "apiVersion": "2018-11-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', variables('webAppName2'))]"
+          ],
+          "properties": {
+            "RepoUrl": "[variables('webApp-prod-URL')]",
+            "branch": "main",
+            "IsManualIntegration": true
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "[variables('appServicePlanName3')]",
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2018-02-01",
-      "location": "[variables('location2')]",
+      "location": "[variables('location3')]",
       "sku": {
         "name": "S1",
         "capacity": 0
@@ -122,31 +156,46 @@
     },
 
     {
-      "name": "[variables('webAppName2')]",
+      "name": "[variables('webAppName3')]",
       "type": "Microsoft.Web/sites",
       "apiVersion": "2018-11-01",
-      "location": "[variables('location2')]",
+      "location": "[variables('location3')]",
       "kind": "app",
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName2'))]"
+        "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName3'))]"
       ],
       "properties": {
-        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName2'))]"
-      }
+        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName3'))]"
+      },
+      "resources": [
+        {
+          "name": "web",
+          "type": "sourcecontrols",
+          "apiVersion": "2018-11-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', variables('webAppName3'))]"
+          ],
+          "properties": {
+            "RepoUrl": "[variables('webApp-prod-URL')]",
+            "branch": "main",
+            "IsManualIntegration": true
+          }
+        }
+      ]
     },
     //---Application Gateway---------------------------------------------------------------------------
     {
       "name": "[variables('publicIPAddress1Name')]",
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2020-05-01",
-      "location": "[variables('location1')]",
+      "location": "[variables('location12')]",
       "sku": { "name": "Standard" },
       "properties": {
         "publicIPAllocationMethod": "Static",
         "publicIPAddressVersion": "IPv4",
         "dnsSettings": {
           "domainNameLabel": "[variables('publicDnsName')]",
-          "fqdn": "[concat(variables('publicDnsName'), '.', variables('location1'), '.cloudapp.azure.com')]"
+          "fqdn": "[concat(variables('publicDnsName'), '.', variables('location12'), '.cloudapp.azure.com')]"
         }
       }
     },
@@ -154,14 +203,14 @@
       "apiVersion": "2020-05-01",
       "name": "[variables('appGatewayName')]",
       "type": "Microsoft.Network/applicationGateways",
-      "location": "[variables('location1')]",
+      "location": "[variables('location12')]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/virtualNetworks/', variables('vnetName'))]",
         "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIPAddress1Name'))]"
       ],
       "properties": {
         "sku": {
-          "name": "Standard_V2",
+          "name": "Standard_v2",
           "tier": "Standard_v2",
           "capacity": 2
         },
@@ -214,10 +263,10 @@
         ],
         "httpListeners": [
           {
-            "name": "app111httpListener",
+            "name": "httpListener",
             "properties": {
               "FrontendIpConfiguration": {
-                "id": "[variables('FrontEndIpId')]"                  
+                "id": "[variables('FrontEndIpId')]"
               },
               "FrontendPort": {
                 "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/applicationGateways/frontendPorts', variables('appGatewayName'), 'frontendPort')]"
@@ -228,11 +277,11 @@
         ],
         "requestRoutingRules": [
           {
-            "Name": "app111Rule1",
+            "Name": "httpRule-1",
             "properties": {
               "RuleType": "Basic",
               "httpListener": {
-                "id": "[concat(variables('applicationGatewayId'), '/httpListeners/app111httpListener')]"
+                "id": "[concat(variables('applicationGatewayId'), '/httpListeners/httpListener')]"
               },
               "backendAddressPool": {
                 "id": "[concat(variables('applicationGatewayId'), '/backendAddressPools/app111BackendPool')]"
