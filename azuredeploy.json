@@ -18,9 +18,9 @@
     },
     "EngineerAlias": {
       "type": "string",
-      "defaultValue": "MsAlias",
+      "defaultValue": "Your Alias",
       "metadata": {
-        "description": "Engineer MS Alias"
+        "description": "Engineer Alias"
       }
     }
   },
