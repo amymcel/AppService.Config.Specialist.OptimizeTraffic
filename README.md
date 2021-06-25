@@ -4,7 +4,6 @@ App Service Lab Configuration for ELX Config Specialize Training
 [![Deploy To Azure](https://aka.ms/deploytoazurebutton)]
 (https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Famymcel%2FAppService.Config.Specialist.OptimizeTraffic%2Fmain%2Fazuredeploy.json)
 
-
 ## This arm deployment will:
 
 1. Crate two App Service Plan - one in East US, one in West US
