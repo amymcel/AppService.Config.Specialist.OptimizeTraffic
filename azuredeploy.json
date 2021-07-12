@@ -47,7 +47,7 @@
     "FrontEndIpId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/applicationGateways/',  variables('appGatewayName'), '/frontendIPConfigurations/appGwPublicFrontendIP')]",
 
     "frontDoorName": "[concat('FDoor-', parameters('EngineerAlias'))]",
-    "backendAddress": "[concat('APP333-', parameters('EngineerAlias'), 'azurewebsites.net')]"
+    "backendAddress": "[concat('APP333-', parameters('EngineerAlias'), '.azurewebsites.net')]"
   },
 
   "resources": [
