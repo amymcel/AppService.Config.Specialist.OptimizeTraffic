@@ -244,7 +244,7 @@
         ],
         "backendAddressPools": [
           {
-            "name": "app111BackendPool",
+            "name": "appBackend",
             "properties": {
               "backendAddresses": []
             }
@@ -252,7 +252,7 @@
         ],
         "backendHttpSettingsCollection": [
           {
-            "name": "app111HttpSettings",
+            "name": "80Settings",
             "properties": {
               "Port": 80,
               "Protocol": "Http",
@@ -263,7 +263,7 @@
         ],
         "httpListeners": [
           {
-            "name": "httpListener",
+            "name": "80Listener",
             "properties": {
               "FrontendIpConfiguration": {
                 "id": "[variables('FrontEndIpId')]"
@@ -277,17 +277,17 @@
         ],
         "requestRoutingRules": [
           {
-            "Name": "httpRule-1",
+            "Name": "80Rule",
             "properties": {
               "RuleType": "Basic",
               "httpListener": {
-                "id": "[concat(variables('applicationGatewayId'), '/httpListeners/httpListener')]"
+                "id": "[concat(variables('applicationGatewayId'), '/httpListeners/80Listener')]"
               },
               "backendAddressPool": {
-                "id": "[concat(variables('applicationGatewayId'), '/backendAddressPools/app111BackendPool')]"
+                "id": "[concat(variables('applicationGatewayId'), '/backendAddressPools/appBackend')]"
               },
               "backendHttpSettings": {
-                "id": "[concat(variables('applicationGatewayId'), '/backendHttpSettingsCollection/app111HttpSettings')]"
+                "id": "[concat(variables('applicationGatewayId'), '/backendHttpSettingsCollection/80Settings')]"
               }
             }
           }
@@ -314,15 +314,14 @@
                 }
               ],
               "acceptedProtocols": [
-                "Http",
-                "Https"
+                "Http"
               ],
               "patternsToMatch": [
                 "/*"
               ],
               "routeConfiguration": {
                 "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",
-                "forwardingProtocol": "MatchRequest",
+                "forwardingProtocol": "HttpOnly",
                 "backendPool": {
                   "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', variables('frontDoorName'), 'backendPool1')]"
                 }
