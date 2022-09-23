@@ -39,7 +39,7 @@
     "appGWsubnetName": "AppGW",
 
     "publicIPAddress1Name": "[concat('appGWpublicIP-', parameters('EngineerAlias'))]",
-    "publicDnsName": "[concat('appgwpub-', parameters('EngineerAlias'))]",
+    "publicDnsName": "[concat('appgwpub', parameters('EngineerAlias'))]",
     "appGatewayName": "[concat('AppGW-', parameters('EngineerAlias'))]",
     "AppGWsubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('appGWsubnetName'))]",
     "applicationGatewayId": "[resourceId('Microsoft.Network/applicationGateways', variables('appGatewayName'))]",
