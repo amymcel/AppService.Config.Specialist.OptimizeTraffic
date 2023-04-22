@@ -3,13 +3,13 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "vnetAddressPrefix": {
-      "value": "10.201.0.0/16"
+      "value": "10.241.0.0/16"
     },
     "GatewaySubnetPrefix": {
-      "value": "10.201.0.0/24"
+      "value": "10.241.0.0/24"
     },
     "EngineerAlias": {
-      "value": "amymcel"
+      "value": "aam"
     }
   }
 }

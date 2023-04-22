@@ -18,28 +18,33 @@
     },
     "EngineerAlias": {
       "type": "string",
-      "defaultValue": "Your Alias",
+      "defaultValue": "Your Alias or Initials",
       "metadata": {
-        "description": "Engineer Alias"
+        "description": "Your Microsoft alias or your initials. Must be less than 15 characters."
       }
     }
   },
   "variables": {
     "webAppRG": "[resourceGroup().name]",
     "webApp-prod-URL": "https://github.com/amymcel/AppService.Config.Specialist.OptimizeTrafficTestApp",
-    "appServicePlanName12": "[concat('ASP12-', parameters('EngineerAlias'))]",
+    "location1": "EastUS",
+    "location2": "WestUS",
+    "location3": "CentralUS",
+    "appServicePlanName1": "[concat('AspEast-', parameters('EngineerAlias'))]",
+    "appServicePlanName2": "[concat('AspWest-', parameters('EngineerAlias'))]",
+    "appServicePlanName3": "[concat('AspCentral-', parameters('EngineerAlias'))]",
     "webAppName1": "[concat('APP111-', parameters('EngineerAlias'))]",
     "webAppName2": "[concat('APP222-', parameters('EngineerAlias'))]",
-    "location12": "EastUS",
     "webAppName3": "[concat('APP333-', parameters('EngineerAlias'))]",
-    "appServicePlanName3": "[concat('ASP3-', parameters('EngineerAlias'))]",
-    "location3": "WestUS",
+    "webAppName4": "[concat('APP444-', parameters('EngineerAlias'))]",
+    "webAppName5": "[concat('APP555-', parameters('EngineerAlias'))]",
 
     "vnetName": "[concat('VNet-', parameters('EngineerAlias'))]",
     "appGWsubnetName": "AppGW",
 
     "publicIPAddress1Name": "[concat('appGWpublicIP-', parameters('EngineerAlias'))]",
     "publicDnsName": "[concat('appgwpub', parameters('EngineerAlias'))]",
+    "trafficManagerName": "[concat('TM-', parameters('EngineerAlias'))]",
     "appGatewayName": "[concat('AppGW-', parameters('EngineerAlias'))]",
     "AppGWsubnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('appGWsubnetName'))]",
     "applicationGatewayId": "[resourceId('Microsoft.Network/applicationGateways', variables('appGatewayName'))]",
@@ -47,15 +52,15 @@
     "FrontEndIpId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/applicationGateways/',  variables('appGatewayName'), '/frontendIPConfigurations/appGwPublicFrontendIP')]",
 
     "frontDoorName": "[concat('FDoor-', parameters('EngineerAlias'))]",
-    "backendAddress": "[concat('APP333-', parameters('EngineerAlias'), '.azurewebsites.net')]"
+    "backendAddress": "[concat('APP555-', parameters('EngineerAlias'), '.azurewebsites.net')]"
   },
-
+  //---Virtual Network ----------------------------------------------------------------
   "resources": [
     {
       "name": "[variables('vnetName')]",
       "type": "Microsoft.Network/virtualNetworks",
       "apiVersion": "2020-05-01",
-      "location": "[variables('location12')]",
+      "location": "[variables('location3')]",
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
@@ -72,30 +77,53 @@
         ]
       }
     },
-
+    //---App Service Plans and Web Apps -----------------------------------------------
     {
-      "name": "[variables('appServicePlanName12')]",
+      "name": "[variables('appServicePlanName1')]",
       "type": "Microsoft.Web/serverfarms",
       "apiVersion": "2018-02-01",
-      "location": "[variables('location12')]",
+      "location": "[variables('location1')]",
       "sku": {
         "name": "S1",
         "capacity": 0
       },
       "kind": "app"
     },
-
+    {
+      "name": "[variables('appServicePlanName2')]",
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2018-02-01",
+      "location": "[variables('location2')]",
+      "sku": {
+        "name": "S1",
+        "capacity": 0
+      },
+      "kind": "app"
+    },
+    {
+      "name": "[variables('appServicePlanName3')]",
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2018-02-01",
+      "location": "[variables('location3')]",
+      "sku": {
+        "name": "S1",
+        "capacity": 0
+      },
+      "kind": "app"
+    },
     {
       "name": "[variables('webAppName1')]",
       "type": "Microsoft.Web/sites",
       "apiVersion": "2018-11-01",
-      "location": "[variables('location12')]",
+      "location": "[variables('location1')]",
       "kind": "app",
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName12'))]"
+        "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName1'))]"
       ],
       "properties": {
-        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName12'))]"
+        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName1'))]",
+        "httpsOnly": false,
+        "clientAffinityEnabled": false
       },
       "resources": [
         {
@@ -113,18 +141,19 @@
         }
       ]
     },
-
     {
       "name": "[variables('webAppName2')]",
       "type": "Microsoft.Web/sites",
       "apiVersion": "2018-11-01",
-      "location": "[variables('location12')]",
+      "location": "[variables('location2')]",
       "kind": "app",
       "dependsOn": [
-        "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName12'))]"
+        "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName2'))]"
       ],
       "properties": {
-        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName12'))]"
+        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName2'))]",
+        "httpsOnly": false,
+        "clientAffinityEnabled": false
       },
       "resources": [
         {
@@ -142,19 +171,6 @@
         }
       ]
     },
-
-    {
-      "name": "[variables('appServicePlanName3')]",
-      "type": "Microsoft.Web/serverfarms",
-      "apiVersion": "2018-02-01",
-      "location": "[variables('location3')]",
-      "sku": {
-        "name": "S1",
-        "capacity": 0
-      },
-      "kind": "app"
-    },
-
     {
       "name": "[variables('webAppName3')]",
       "type": "Microsoft.Web/sites",
@@ -165,7 +181,9 @@
         "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName3'))]"
       ],
       "properties": {
-        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName3'))]"
+        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName3'))]",
+        "httpsOnly": false,
+        "clientAffinityEnabled": false
       },
       "resources": [
         {
@@ -183,208 +201,271 @@
         }
       ]
     },
-    //---Application Gateway---------------------------------------------------------------------------
     {
-      "name": "[variables('publicIPAddress1Name')]",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2020-05-01",
-      "location": "[variables('location12')]",
-      "sku": { "name": "Standard" },
-      "properties": {
-        "publicIPAllocationMethod": "Static",
-        "publicIPAddressVersion": "IPv4",
-        "dnsSettings": {
-          "domainNameLabel": "[variables('publicDnsName')]",
-          "fqdn": "[concat(variables('publicDnsName'), '.', variables('location12'), '.cloudapp.azure.com')]"
-        }
-      }
-    },
-    {
-      "apiVersion": "2020-05-01",
-      "name": "[variables('appGatewayName')]",
-      "type": "Microsoft.Network/applicationGateways",
-      "location": "[variables('location12')]",
+      "name": "[variables('webAppName4')]",
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "location": "[variables('location1')]",
+      "kind": "app",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks/', variables('vnetName'))]",
-        "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIPAddress1Name'))]"
+        "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName1'))]"
       ],
       "properties": {
-        "sku": {
-          "name": "Standard_v2",
-          "tier": "Standard_v2",
-          "capacity": 2
-        },
-        "gatewayIPConfigurations": [
-          {
-            "name": "appGatewayIpConfig",
-            "properties": {
-              "subnet": {
-                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('appGWsubnetName'))]"
-              }
-            }
+        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName1'))]",
+        "httpsOnly": false,
+        "clientAffinityEnabled": false
+      },
+      "resources": [
+        {
+          "name": "web",
+          "type": "sourcecontrols",
+          "apiVersion": "2018-11-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', variables('webAppName4'))]"
+          ],
+          "properties": {
+            "RepoUrl": "[variables('webApp-prod-URL')]",
+            "branch": "main",
+            "IsManualIntegration": true
           }
-        ],
-        "frontendIPConfigurations": [
-          {
-            "name": "appGwPublicFrontendIP",
-            "properties": {
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddress1Name'))]"
-              }
-            }
-          }
-        ],
-        "frontendPorts": [
-          {
-            "name": "frontendPort",
-            "properties": {
-              "Port": 80
-            }
-          }
-        ],
-        "backendAddressPools": [
-          {
-            "name": "appBackend",
-            "properties": {
-              "backendAddresses": []
-            }
-          }
-        ],
-        "backendHttpSettingsCollection": [
-          {
-            "name": "80Settings",
-            "properties": {
-              "Port": 80,
-              "Protocol": "Http",
-              "CookieBasedAffinity": "Disabled",
-              "requestTimeout": 20
-            }
-          }
-        ],
-        "httpListeners": [
-          {
-            "name": "80Listener",
-            "properties": {
-              "FrontendIpConfiguration": {
-                "id": "[variables('FrontEndIpId')]"
-              },
-              "FrontendPort": {
-                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/applicationGateways/frontendPorts', variables('appGatewayName'), 'frontendPort')]"
-              },
-              "Protocol": "Http"
-            }
-          }
-        ],
-        "requestRoutingRules": [
-          {
-            "Name": "80Rule",
-            "properties": {
-              "RuleType": "Basic",
-              "httpListener": {
-                "id": "[concat(variables('applicationGatewayId'), '/httpListeners/80Listener')]"
-              },
-              "backendAddressPool": {
-                "id": "[concat(variables('applicationGatewayId'), '/backendAddressPools/appBackend')]"
-              },
-              "backendHttpSettings": {
-                "id": "[concat(variables('applicationGatewayId'), '/backendHttpSettingsCollection/80Settings')]"
-              }
-            }
-          }
-        ],
-        "enableHttp2": false,
-        "sslCertificates": [],
-        "probes": []
-      }
+        }
+      ]
     },
-    //---Front Door-----------------------------------------------------------------------------------------
     {
-      "type": "Microsoft.Network/frontDoors",
-      "apiVersion": "2020-01-01",
-      "name": "[variables('frontDoorName')]",
-      "location": "global",
+      "name": "[variables('webAppName5')]",
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2018-11-01",
+      "location": "[variables('location2')]",
+      "kind": "app",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName2'))]"
+      ],
       "properties": {
-        "routingRules": [
-          {
-            "name": "routingRule1",
-            "properties": {
-              "frontendEndpoints": [
-                {
-                  "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', variables('frontDoorName'), 'frontendEndpoint1')]"
-                }
-              ],
-              "acceptedProtocols": [
-                "Http"
-              ],
-              "patternsToMatch": [
-                "/*"
-              ],
-              "routeConfiguration": {
-                "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",
-                "forwardingProtocol": "HttpOnly",
-                "backendPool": {
-                  "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', variables('frontDoorName'), 'backendPool1')]"
-                }
-              },
-              "enabledState": "Enabled"
-            }
+        "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlanName2'))]",
+        "httpsOnly": false,
+        "clientAffinityEnabled": false
+      },
+      "resources": [
+        {
+          "name": "web",
+          "type": "sourcecontrols",
+          "apiVersion": "2018-11-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites', variables('webAppName5'))]"
+          ],
+          "properties": {
+            "RepoUrl": "[variables('webApp-prod-URL')]",
+            "branch": "main",
+            "IsManualIntegration": true
           }
-        ],
-        "healthProbeSettings": [
-          {
-            "name": "healthProbeSettings1",
-            "properties": {
-              "path": "/",
-              "protocol": "Http",
-              "intervalInSeconds": 120
-            }
+        }
+      ]
+    },
+  
+    //---Traffic Manager ------------------------------------------------------------------------------
+
+      //---Application Gateway---------------------------------------------------------------------------
+      {
+        "name": "[variables('publicIPAddress1Name')]",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "apiVersion": "2020-05-01",
+        "location": "[variables('location3')]",
+        "sku": { "name": "Standard" },
+        "properties": {
+          "publicIPAllocationMethod": "Static",
+          "publicIPAddressVersion": "IPv4",
+          "dnsSettings": {
+            "domainNameLabel": "[variables('publicDnsName')]",
+            "fqdn": "[concat(variables('publicDnsName'), '.', variables('location3'), '.cloudapp.azure.com')]"
           }
+        }
+      },
+      {
+        "apiVersion": "2020-05-01",
+        "name": "[variables('appGatewayName')]",
+        "type": "Microsoft.Network/applicationGateways",
+        "location": "[variables('location3')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.Network/virtualNetworks/', variables('vnetName'))]",
+          "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIPAddress1Name'))]"
         ],
-        "loadBalancingSettings": [
-          {
-            "name": "loadBalancingSettings1",
-            "properties": {
-              "sampleSize": 4,
-              "successfulSamplesRequired": 2
-            }
-          }
-        ],
-        "backendPools": [
-          {
-            "name": "backendPool1",
-            "properties": {
-              "backends": [
-                {
-                  "address": "[variables('backendAddress')]",
-                  "backendHostHeader": "[variables('backendAddress')]",
-                  "httpPort": 80,
-                  "httpsPort": 443,
-                  "weight": 50,
-                  "priority": 1,
-                  "enabledState": "Enabled"
+        "properties": {
+          "sku": {
+            "name": "Standard_v2",
+            "tier": "Standard_v2",
+            "capacity": 2
+          },
+          "gatewayIPConfigurations": [
+            {
+              "name": "appGatewayIpConfig",
+              "properties": {
+                "subnet": {
+                  "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), variables('appGWsubnetName'))]"
                 }
-              ],
-              "loadBalancingSettings": {
-                "id": "[resourceId('Microsoft.Network/frontDoors/loadBalancingSettings', variables('frontDoorName'), 'loadBalancingSettings1')]"
-              },
-              "healthProbeSettings": {
-                "id": "[resourceId('Microsoft.Network/frontDoors/healthProbeSettings', variables('frontDoorName'), 'healthProbeSettings1')]"
               }
             }
-          }
-        ],
-        "frontendEndpoints": [
-          {
-            "name": "frontendEndpoint1",
-            "properties": {
-              "hostName": "[concat(variables('frontDoorName'), '.azurefd.net')]",
-              "sessionAffinityEnabledState": "Disabled"
+          ],
+          "frontendIPConfigurations": [
+            {
+              "name": "appGwPublicFrontendIP",
+              "properties": {
+                "publicIPAddress": {
+                  "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddress1Name'))]"
+                }
+              }
             }
-          }
-        ],
-        "enabledState": "Enabled"
+          ],
+          "frontendPorts": [
+            {
+              "name": "frontendPort",
+              "properties": {
+                "Port": 80
+              }
+            }
+          ],
+          "backendAddressPools": [
+            {
+              "name": "appBackend",
+              "properties": {
+                "backendAddresses": []
+              }
+            }
+          ],
+          "backendHttpSettingsCollection": [
+            {
+              "name": "80Settings",
+              "properties": {
+                "Port": 80,
+                "Protocol": "Http",
+                "CookieBasedAffinity": "Disabled",
+                "requestTimeout": 20
+              }
+            }
+          ],
+          "httpListeners": [
+            {
+              "name": "80Listener",
+              "properties": {
+                "FrontendIpConfiguration": {
+                  "id": "[variables('FrontEndIpId')]"
+                },
+                "FrontendPort": {
+                  "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/applicationGateways/frontendPorts', variables('appGatewayName'), 'frontendPort')]"
+                },
+                "Protocol": "Http"
+              }
+            }
+          ],
+          "requestRoutingRules": [
+            {
+              "Name": "80Rule",
+              "properties": {
+                "RuleType": "Basic",
+                "httpListener": {
+                  "id": "[concat(variables('applicationGatewayId'), '/httpListeners/80Listener')]"
+                },
+                "backendAddressPool": {
+                  "id": "[concat(variables('applicationGatewayId'), '/backendAddressPools/appBackend')]"
+                },
+                "backendHttpSettings": {
+                  "id": "[concat(variables('applicationGatewayId'), '/backendHttpSettingsCollection/80Settings')]"
+                }
+              }
+            }
+          ],
+          "enableHttp2": false,
+          "sslCertificates": [],
+          "probes": []
+        }
+      },
+      //---Front Door-----------------------------------------------------------------------------------------
+      {
+        "type": "Microsoft.Network/frontDoors",
+        "apiVersion": "2020-01-01",
+        "name": "[variables('frontDoorName')]",
+        "location": "global",
+        "properties": {
+          "routingRules": [
+            {
+              "name": "routingRule1",
+              "properties": {
+                "frontendEndpoints": [
+                  {
+                    "id": "[resourceId('Microsoft.Network/frontDoors/frontendEndpoints', variables('frontDoorName'), 'frontendEndpoint1')]"
+                  }
+                ],
+                "acceptedProtocols": [
+                  "Http"
+                ],
+                "patternsToMatch": [
+                  "/*"
+                ],
+                "routeConfiguration": {
+                  "@odata.type": "#Microsoft.Azure.FrontDoor.Models.FrontdoorForwardingConfiguration",
+                  "forwardingProtocol": "HttpOnly",
+                  "backendPool": {
+                    "id": "[resourceId('Microsoft.Network/frontDoors/backendPools', variables('frontDoorName'), 'backendPool1')]"
+                  }
+                },
+                "enabledState": "Enabled"
+              }
+            }
+          ],
+          "healthProbeSettings": [
+            {
+              "name": "healthProbeSettings1",
+              "properties": {
+                "path": "/",
+                "protocol": "Http",
+                "intervalInSeconds": 120
+              }
+            }
+          ],
+          "loadBalancingSettings": [
+            {
+              "name": "loadBalancingSettings1",
+              "properties": {
+                "sampleSize": 4,
+                "successfulSamplesRequired": 2
+              }
+            }
+          ],
+          "backendPools": [
+            {
+              "name": "backendPool1",
+              "properties": {
+                "backends": [
+                  {
+                    "address": "[variables('backendAddress')]",
+                    "backendHostHeader": "[variables('backendAddress')]",
+                    "httpPort": 80,
+                    "httpsPort": 443,
+                    "weight": 50,
+                    "priority": 1,
+                    "enabledState": "Enabled"
+                  }
+                ],
+                "loadBalancingSettings": {
+                  "id": "[resourceId('Microsoft.Network/frontDoors/loadBalancingSettings', variables('frontDoorName'), 'loadBalancingSettings1')]"
+                },
+                "healthProbeSettings": {
+                  "id": "[resourceId('Microsoft.Network/frontDoors/healthProbeSettings', variables('frontDoorName'), 'healthProbeSettings1')]"
+                }
+              }
+            }
+          ],
+          "frontendEndpoints": [
+            {
+              "name": "frontendEndpoint1",
+              "properties": {
+                "hostName": "[concat(variables('frontDoorName'), '.azurefd.net')]",
+                "sessionAffinityEnabledState": "Disabled"
+              }
+            }
+          ],
+          "enabledState": "Enabled"
+        }
       }
-    }
   ],
   "outputs": {}
 }
